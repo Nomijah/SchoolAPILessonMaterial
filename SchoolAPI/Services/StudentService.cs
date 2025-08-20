@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using SchoolAPI.DTOs;
 using SchoolAPI.Models;
 using SchoolAPI.Repositories;
@@ -47,6 +48,20 @@ namespace SchoolAPI.Services
             _mapper.Map(dto, studentToUpdate);
 
             await _repo.UpdateAsync(studentToUpdate, ct);
+            return await _repo.SaveChangesAsync(ct);
+        }
+
+        public async Task<bool> PatchAsync(int id, JsonPatchDocument<Student> patchDoc, CancellationToken ct = default)
+        {
+            var studentToPatch = await _repo.GetByIdAsync(id, ct);
+            if (studentToPatch is null)
+            {
+                return false;
+            }
+
+            patchDoc.ApplyTo(studentToPatch);
+
+            await _repo.UpdateAsync(studentToPatch, ct);
             return await _repo.SaveChangesAsync(ct);
         }
 

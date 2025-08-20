@@ -1,6 +1,10 @@
-﻿using FluentValidation;
+﻿using Azure;
+using FluentValidation;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Validations;
 using SchoolAPI.DTOs;
+using SchoolAPI.Models;
 using SchoolAPI.Services;
 
 namespace SchoolAPI.Controllers
@@ -60,6 +64,17 @@ namespace SchoolAPI.Controllers
 
             var isUpdated = await _service.UpdateAsync(id, dto, ct);
             return isUpdated ? NoContent() : NotFound();
+        }
+
+        [HttpPatch]
+        public async Task<IActionResult> Patch(int id, [FromBody] JsonPatchDocument<Student> patchDoc, CancellationToken ct)
+        {
+            if (patchDoc is null)
+            {
+                return BadRequest();
+            }
+            var result = await _service.PatchAsync(id, patchDoc, ct);
+            return result ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id:int}")]
